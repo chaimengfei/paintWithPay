@@ -1,7 +1,23 @@
 <template>
 	<view class="container">
-		<view class="header">
-			<text class="subtitle">提交订单后请联系 李增春-13161621688 处理支付与配送</text>
+		<!-- 收货地址区域：有地址点进列表，无地址点进新增 -->
+		<view class="header address-header" @click="selectedAddress ? goAddressList() : goAddAddress()">
+			<view v-if="selectedAddress" class="address-content">
+				<view class="address-row">
+					<text class="address-name">{{ selectedAddress.recipient_name }}</text>
+					<text class="address-phone">{{ selectedAddress.recipient_phone }}</text>
+				</view>
+				<view class="address-detail">{{ selectedAddress.fullAddress }}</view>
+				<view class="address-arrow">›</view>
+			</view>
+			<view v-else class="address-empty">
+				<text class="address-empty-icon">📍</text>
+				<view class="address-empty-text">
+					<text class="address-empty-tip">您还没有收货地址</text>
+					<text class="address-empty-action">点击新增地址</text>
+				</view>
+				<text class="address-arrow">›</text>
+			</view>
 		</view>
 
 		<view class="list-title" v-if="cartItems.length > 0">
@@ -79,11 +95,14 @@
 		deleteCartItem
 	} from '@/api/cart.js'
 	import { orderCheckout } from '@/api/order.js'
+	import { getAddressList } from '@/api/address.js'
 
 	export default {
 		data() {
 			return {
-				cartItems: []
+				cartItems: [],
+				addressList: [],
+				selectedAddress: null
 			}
 		},
 		onShow() {
@@ -97,12 +116,14 @@
 							uni.navigateTo({ url: '/pages/user/login' })
 						} else {
 							this.cartItems = []
+							this.selectedAddress = null
 						}
 					}
 				})
 				return
 			}
 			this.loadCartData()
+			this.loadAddressList()
 		},
 		computed: {
 			isAllSelected() {
@@ -158,6 +179,39 @@
 					}
 				} catch (e) {}
 			},
+			async loadAddressList() {
+				try {
+					const res = await getAddressList()
+					if (res.data && res.data.code === 0) {
+						const raw = res.data.data
+						const list = Array.isArray(raw) ? raw : (raw && raw.list ? raw.list : [])
+						this.addressList = list.map(addr => ({
+							...addr,
+							address_id: addr.address_id != null ? addr.address_id : addr.id,
+							fullAddress: [addr.province, addr.city, addr.district, addr.detail].filter(Boolean).join(' ')
+						}))
+						// 默认地址优先，否则取第一个
+						const defaultAddr = this.addressList.find(a => a.is_default === true || a.is_default === 1)
+						this.selectedAddress = defaultAddr || this.addressList[0] || null
+					} else {
+						this.addressList = []
+						this.selectedAddress = null
+					}
+				} catch (e) {
+					this.addressList = []
+					this.selectedAddress = null
+				}
+			},
+			goAddressList() {
+				uni.navigateTo({
+					url: '/pages/address/list?from=cart'
+				})
+			},
+			goAddAddress() {
+				uni.navigateTo({
+					url: '/pages/address/edit'
+				})
+			},
 			goToIndex() {
 				uni.switchTab({ url: '/pages/index/index' })
 			},
@@ -180,8 +234,13 @@
 					uni.showToast({ title: '请移除不可购买的商品后再结算', icon: 'none' })
 					return
 				}
+				// 有选中地址则传给后端，不传则使用默认地址
+				const payload = { cart_ids: cartIds }
+				if (this.selectedAddress && this.selectedAddress.address_id) {
+					payload.address_id = this.selectedAddress.address_id
+				}
 				uni.showLoading({ title: '提交中...', mask: true })
-				orderCheckout({ cart_ids: cartIds })
+				orderCheckout(payload)
 					.then(res => {
 						uni.hideLoading()
 						if (res.data && res.data.code === 0) {
@@ -266,19 +325,76 @@
 	.container {
 		padding-bottom: 120rpx;
 	}
-	.header {
-		padding: 20rpx;
+	.address-header {
+		padding: 24rpx;
 		background-color: #fff;
+		margin-bottom: 16rpx;
+		border-radius: 0 0 16rpx 16rpx;
+		box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
 	}
-	.subtitle {
-		font-size: 24rpx;
+	.address-content {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		position: relative;
+		padding-right: 40rpx;
+	}
+	.address-row {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		margin-bottom: 12rpx;
+	}
+	.address-name {
+		font-size: 30rpx;
+		font-weight: bold;
 		color: #333;
+		margin-right: 20rpx;
+	}
+	.address-phone {
+		font-size: 26rpx;
+		color: #666;
+	}
+	.address-detail {
+		font-size: 26rpx;
+		color: #666;
 		line-height: 1.5;
-		background-color: #fff3cd;
-		padding: 20rpx;
-		border-radius: 8rpx;
-		border-left: 4rpx solid #ffc107;
-		display: block;
+		flex: 1;
+	}
+	.address-arrow {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 36rpx;
+		color: #999;
+	}
+	.address-empty {
+		display: flex;
+		align-items: center;
+		padding: 16rpx 0;
+	}
+	.address-empty-icon {
+		font-size: 40rpx;
+		margin-right: 20rpx;
+	}
+	.address-empty-text {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 6rpx;
+	}
+	.address-empty-tip {
+		font-size: 28rpx;
+		color: #666;
+	}
+	.address-empty-action {
+		font-size: 26rpx;
+		color: #4169E1;
+	}
+	.address-empty .address-arrow {
+		position: static;
+		transform: none;
 	}
 	.list-title {
 		padding: 20rpx;
