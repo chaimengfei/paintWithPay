@@ -1,4 +1,4 @@
-import { post, get } from './request'
+import { get, post } from './request'
 import { BASE_URL } from './common'
 
 // 调用后端登录接口
@@ -13,7 +13,15 @@ export const goLogin = (data) => {
  * @param {string} [data.avatar] 头像URL
  */
 export const updateUserInfo = (data) => {
-	return post('/api/user/update', data)
+	return post('/api/user/update/info', data)
+}
+
+/**
+ * 获取用户余额（单位：分）
+ * @returns {Promise}
+ */
+export const getUserBalance = () => {
+	return get('/api/user/balance')
 }
 
 /**

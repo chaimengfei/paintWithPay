@@ -63,6 +63,7 @@ function parseProductListResponse(res, isLoggedIn) {
 /**
  * 获取商品列表
  * @param {Object} options 请求参数
+ * @param {number} [options.shopId] 店铺ID（可选）
  * @param {string} [options.searchName] 搜索关键词（可选）
  * @param {number} [options.categoryId] 分类ID（可选，100表示热销分类，其他值表示具体分类）
  * @param {number} [options.page=1] 页码（可选，默认1）
@@ -72,17 +73,21 @@ function parseProductListResponse(res, isLoggedIn) {
 export const getProductList = (options = {}) => {
   return new Promise((resolve, reject) => {
     // 解析参数
+    const shopId = options.shopId !== undefined ? options.shopId : null
     const searchName = options.searchName || ''
     const categoryId = options.categoryId !== undefined ? options.categoryId : null
     const page = options.page || 1
     const pageSize = options.pageSize || 20
-    
+
     // 检查是否已登录
     const token = uni.getStorageSync('token')
     const isLoggedIn = !!token
-    
+
     // 构建查询参数
     const params = {}
+    if (shopId !== null) {
+      params.shop_id = shopId
+    }
     if (searchName && searchName.trim()) {
       params.name = searchName.trim()
     }

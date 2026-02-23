@@ -80,9 +80,9 @@
               <button class="action-btn contact-btn" hover-class="contact-btn-hover" @click.stop="contactService" @tap.stop="contactService">
                 联系客服
               </button>
-              <button class="action-btn add-draft-btn" @click.stop="addToDraft(product.id)" @tap.stop="addToDraft(product.id)">
-                加入购物车
-              </button>
+<button class="action-btn add-cart-btn" @click.stop="addToCart(product.id)" @tap.stop="addToCart(product.id)">
+				加入购物车
+			</button>
             </view>
           </view>
         </view>
@@ -104,7 +104,7 @@
 
 <script>
 import { getProductList } from '@/api/product.js'
-import { addToDraft as addToDraftApi, getDraftList } from '@/api/draft.js'
+import { addToCart as addToCartApi, getCartList } from '@/api/cart.js'
 import { goLogin } from '@/api/user.js'
 import { showContactService, ENV_INFO } from '@/api/common.js'
 
@@ -385,7 +385,7 @@ export default {
     },
     
     // 添加商品到需求单
-    async addToDraft(productId) {
+    async addToCart(productId) {
       try {
         // 检查登录状态，未登录时与需求单页一致：先弹窗提示，用户确认后再跳转登录
         const token = uni.getStorageSync('token')
@@ -404,7 +404,7 @@ export default {
           return
         }
         
-        const res = await addToDraftApi({ product_id: productId })
+        const res = await addToCartApi({ product_id: productId, quantity: 1 })
         
         if (res.data.code === 0) {
           uni.showToast({
@@ -413,12 +413,12 @@ export default {
           })
           
           // 更新底部需求单徽标
-          this.updateDraftBadge()
+          this.updateCartBadge()
           
           // 延迟跳转到需求单页面，让用户看到提示
           setTimeout(() => {
             uni.switchTab({
-              url: '/pages/draft/index'
+              url: '/pages/cart/index'
             })
           }, 1000)
         } else {
@@ -514,34 +514,20 @@ export default {
     },
     
     // 更新需求单徽标
-    async updateDraftBadge() {
-      // 只有在已登录状态下才更新需求单徽标
-      if (!this.isLogin) {
-        return
-      }
-      
+    async updateCartBadge() {
+      if (!this.isLogin) return
       try {
-        const res = await getDraftList()
-        if (res.data.code === 0) {
-          const draftItems = res.data.data || []
-          const uniqueItemCount = draftItems.length
-          
-          if (uniqueItemCount > 0) {
-            uni.setTabBarBadge({
-              index: 2, // 需求单tab的索引是2
-              text: uniqueItemCount.toString()
-            })
+        const res = await getCartList()
+        if (res.data && res.data.code === 0) {
+          const list = res.data.data
+          const count = Array.isArray(list) ? list.length : 0
+          if (count > 0) {
+            uni.setTabBarBadge({ index: 2, text: String(count) })
           } else {
-            uni.removeTabBarBadge({
-              index: 2 // 需求单tab的索引是2
-            })
+            uni.removeTabBarBadge({ index: 2 })
           }
         }
-      } catch (error) {
-        // 如果是401错误，说明token可能过期，可以尝试重新登录
-        if (error.statusCode === 401) {
-        }
-      }
+      } catch (e) {}
     },
     
     // 搜索输入处理
@@ -1056,12 +1042,12 @@ export default {
   z-index: 10;
 }
 
-.add-draft-btn {
+.add-cart-btn {
   background-color: #e0e0e0;
   color: #444;
 }
 
-.add-draft-btn:active {
+.add-cart-btn:active {
   background-color: #d8d8d8;
 }
 

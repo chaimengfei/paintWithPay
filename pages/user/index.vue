@@ -146,7 +146,7 @@ export default {
     // 跳转到我的单据
     goToInquiry() {
       uni.navigateTo({
-        url: '/pages/inquiry/index'
+        url: '/pages/order/index'
       })
     },
     

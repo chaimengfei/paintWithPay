@@ -1,0 +1,35 @@
+import { post } from './request'
+
+/**
+ * 支付确认（余额+线下，取消微信后使用）
+ * @param {Object} data
+ * @param {string} data.order_no 订单号
+ * @param {number} [data.balance_amount] 使用余额金额（分）
+ * @param {number} [data.offline_amount] 线下支付金额（分）
+ * @returns {Promise}
+ */
+export const payConfirm = (data) => {
+  return post('/api/pay/confirm', data)
+}
+
+/**
+ * 组合支付（余额+微信，后端自动判断）
+ * @param {Object} data
+ * @param {string} data.order_no 订单号
+ * @returns {Promise}
+ */
+export const payCombined = (data) => {
+  return post('/api/pay/combined', data)
+}
+
+/**
+ * 小程序充值预下单
+ * @param {Object} data
+ * @param {number} data.amount 充值金额（分）
+ * @param {number} [data.gift_type]
+ * @param {number} [data.gift_amount]
+ * @returns {Promise}
+ */
+export const payRecharge = (data) => {
+  return post('/api/pay/recharge', data)
+}

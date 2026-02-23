@@ -35,13 +35,13 @@
     <!-- 底部操作栏 -->
     <view class="action-bar">
       <button class="action-btn contact-btn" @click="contactService">联系客服</button>
-      <button class="action-btn add-draft-btn" @click="addToDraft">加入购物车</button>
+      <button class="action-btn add-cart-btn" @click="addToCart">加入购物车</button>
     </view>
   </view>
 </template>
 
 <script>
-import { addToDraft as addToDraftApi } from '@/api/draft.js'
+import { addToCart as addToCartApi } from '@/api/cart.js'
 import { showContactService } from '@/api/common.js'
 
 export default {
@@ -91,7 +91,7 @@ export default {
         })
       }
     },
-    async addToDraft() {
+    async addToCart() {
       if (!this.product.id) {
         uni.showToast({
           title: '商品ID缺失',
@@ -118,7 +118,7 @@ export default {
           return
         }
 
-        const res = await addToDraftApi({ product_id: this.product.id })
+        const res = await addToCartApi({ product_id: this.product.id, quantity: 1 })
         
         if (res.data.code === 0) {
           uni.showToast({
@@ -318,12 +318,12 @@ export default {
   background-color: #e6850e;
 }
 
-.add-draft-btn {
+.add-cart-btn {
   background-color: #e8e8e8;
   color: #888;
 }
 
-.add-draft-btn:active {
+.add-cart-btn:active {
   background-color: #d8d8d8;
 }
 </style>
