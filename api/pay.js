@@ -15,7 +15,10 @@ export const payConfirm = (data) => {
 /**
  * 组合支付（余额+微信，后端自动判断）
  * @param {Object} data
- * @param {string} data.order_no 订单号
+ * @param {string} data.order_no 订单号（必填）
+ * @param {string} [data.code] 微信 wx.login 返回的 code（有微信支付部分时必填）
+ * @param {number} [data.total] 应付总额（分），用于校验，不传则按订单应付金额
+ * @param {string} [data.note] 订单备注
  * @returns {Promise}
  */
 export const payCombined = (data) => {

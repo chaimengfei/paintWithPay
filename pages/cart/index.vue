@@ -245,10 +245,11 @@
 					.then(res => {
 						uni.hideLoading()
 						if (res.data && res.data.code === 0) {
-							const orderNo = res.data.data && res.data.data.order_no
-							if (orderNo) {
-								uni.redirectTo({
-									url: `/pages/order/success?order_no=${encodeURIComponent(orderNo)}&order_info=订单已创建，请支付或联系客服`
+							const data = res.data.data
+							if (data && data.order_no) {
+								uni.setStorageSync('orderConfirmData', data)
+								uni.navigateTo({
+									url: '/pages/order/confirm'
 								})
 							} else {
 								uni.showToast({ title: res.data.message || '提交成功', icon: 'none' })
