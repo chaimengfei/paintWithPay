@@ -38,7 +38,7 @@
 					</view>
 					<view class="price-container">
 						<text class="price-label">单价：</text>
-						<text class="product-price">¥{{ priceYuan(item.product_seller_price) }}</text>
+						<text class="product-price">¥{{ (Number(item.product_seller_price) || 0).toFixed(2) }}</text>
 						<text class="product-unit">/ {{ item.product_unit || '件' }}</text>
 					</view>
 					<view v-if="item.message" class="item-message">{{ item.message }}</view>
@@ -68,7 +68,6 @@
 						<text class="total-label">合计：</text>
 						<text class="total-price">¥{{ totalPrice }}</text>
 					</view>
-					<text class="total-tip">金额单位 元，支付以实际为准</text>
 				</view>
 				<button
 					class="submit-btn"
@@ -131,10 +130,11 @@
 				return this.cartItems.length > 0 && this.cartItems.every(item => item.selected)
 			},
 			totalPrice() {
+				// product_seller_price 为元，直接乘数量求和
 				const total = this.cartItems
 					.filter(item => item.selected)
-					.reduce((sum, item) => sum + (this.priceFen(item.product_seller_price) || 0) * Number(item.quantity), 0)
-				return (total / 100).toFixed(2)
+					.reduce((sum, item) => sum + (Number(item.product_seller_price) || 0) * Number(item.quantity || 0), 0)
+				return total.toFixed(2)
 			},
 			selectedCartIds() {
 				return this.cartItems
@@ -143,14 +143,6 @@
 			}
 		},
 		methods: {
-			priceFen(v) {
-				if (v == null || v === '') return 0
-				return Number(v)
-			},
-			priceYuan(v) {
-				const n = this.priceFen(v)
-				return n ? (n / 100).toFixed(2) : '0.00'
-			},
 			async loadCartData() {
 				try {
 					const res = await getCartList()
@@ -526,7 +518,8 @@
 		right: 0;
 		background-color: #fff;
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
+		align-items: center;
 		padding: 20rpx;
 		border-top: 1rpx solid #eee;
 		box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
@@ -534,6 +527,7 @@
 	.select-all {
 		display: flex;
 		align-items: center;
+		flex-shrink: 0;
 	}
 	.select-all text {
 		margin-left: 10rpx;
@@ -544,12 +538,13 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
-		margin-bottom: 10rpx;
+		justify-content: center;
+		min-width: 0;
+		margin-left: 20rpx;
 	}
 	.total-row {
 		display: flex;
 		align-items: baseline;
-		margin-bottom: 4rpx;
 	}
 	.total-label {
 		font-size: 26rpx;
@@ -565,18 +560,22 @@
 		font-size: 22rpx;
 		color: #666;
 		line-height: 1.4;
+		margin-top: 4rpx;
 	}
 	.submit-btn {
 		background-color: #ffb74d;
 		color: #fff;
-		height: 80rpx;
-		line-height: 80rpx;
-		padding: 0 30rpx;
+		height: 72rpx;
+		line-height: 72rpx;
+		padding: 0 36rpx;
 		border-radius: 8rpx;
 		font-size: 28rpx;
 		font-weight: bold;
-		width: 100%;
+		width: auto;
+		min-width: 180rpx;
+		flex-shrink: 0;
 		border: none;
+		margin-left: 20rpx;
 	}
 	.submit-btn:active {
 		background-color: #ffa726;

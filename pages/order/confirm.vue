@@ -81,13 +81,10 @@ export default {
     }
   },
   methods: {
+    // 金额统一为元，直接格式化
     formatAmount(v) {
       const n = Number(v)
-      if (isNaN(n)) return '0.00'
-      if (n >= 1000 || (n === Math.floor(n) && n > 0 && String(n).length >= 3)) {
-        return (n / 100).toFixed(2)
-      }
-      return n.toFixed(2)
+      return isNaN(n) ? '0.00' : n.toFixed(2)
     },
     goPay() {
       if (!this.order || !this.order.order_no) return
@@ -97,15 +94,12 @@ export default {
         provider: 'weixin',
         success: (loginRes) => {
           const code = loginRes.code || ''
-          const paymentAmount = this.order.payment_amount
-          const totalFen = paymentAmount >= 1000 && paymentAmount === Math.floor(paymentAmount)
-            ? paymentAmount
-            : Math.round(Number(paymentAmount) * 100)
+          const paymentAmount = Number(this.order.payment_amount)
           const payload = {
             order_no: this.order.order_no,
             code: code
           }
-          if (totalFen > 0) payload.total = totalFen
+          if (paymentAmount > 0) payload.total = paymentAmount
           payCombined(payload)
             .then(res => {
               uni.hideLoading()

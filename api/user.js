@@ -17,7 +17,7 @@ export const updateUserInfo = (data) => {
 }
 
 /**
- * 获取用户余额（单位：分）
+ * 获取用户余额（单位：元）
  * @returns {Promise}
  */
 export const getUserBalance = () => {

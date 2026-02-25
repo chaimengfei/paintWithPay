@@ -4,8 +4,8 @@ import { post } from './request'
  * 支付确认（余额+线下，取消微信后使用）
  * @param {Object} data
  * @param {string} data.order_no 订单号
- * @param {number} [data.balance_amount] 使用余额金额（分）
- * @param {number} [data.offline_amount] 线下支付金额（分）
+ * @param {number} [data.balance_amount] 使用余额金额（元）
+ * @param {number} [data.offline_amount] 线下支付金额（元）
  * @returns {Promise}
  */
 export const payConfirm = (data) => {
@@ -17,7 +17,7 @@ export const payConfirm = (data) => {
  * @param {Object} data
  * @param {string} data.order_no 订单号（必填）
  * @param {string} [data.code] 微信 wx.login 返回的 code（有微信支付部分时必填）
- * @param {number} [data.total] 应付总额（分），用于校验，不传则按订单应付金额
+ * @param {number} [data.total] 应付总额（元），用于校验，不传则按订单应付金额
  * @param {string} [data.note] 订单备注
  * @returns {Promise}
  */
@@ -28,7 +28,7 @@ export const payCombined = (data) => {
 /**
  * 小程序充值预下单
  * @param {Object} data
- * @param {number} data.amount 充值金额（分）
+ * @param {number} data.amount 充值金额（元）
  * @param {number} [data.gift_type]
  * @param {number} [data.gift_amount]
  * @returns {Promise}

@@ -23,13 +23,13 @@
             <view class="product-name-wrapper">
               <text class="product-name">{{ item.product_name }}</text>
               <view class="price-line">
-                <text class="product-price">¥{{ priceYuan(item.unit_price) }}</text>
+                <text class="product-price">¥{{ (Number(item.unit_price) || 0).toFixed(2) }}</text>
                 <text v-if="item.unit" class="product-unit">/{{ item.unit }}</text>
                 <text class="product-quantity">×{{ item.quantity }}</text>
               </view>
             </view>
             <view class="total-price">
-              <text class="total-price-text">小计: ¥{{ priceYuan(item.total_price) }}</text>
+              <text class="total-price-text">小计: ¥{{ (Number(item.total_price) || 0).toFixed(2) }}</text>
             </view>
           </view>
         </view>
@@ -57,7 +57,7 @@
       <view class="amount-summary">
         <view class="amount-row total-row">
           <text>实付金额</text>
-          <text>¥{{ priceYuan(order.payment_amount) }}</text>
+          <text>¥{{ (Number(order.payment_amount) || 0).toFixed(2) }}</text>
         </view>
       </view>
     </view>
@@ -86,11 +86,6 @@ const order = ref({
   receiver_address: '',
   order_status: 0
 })
-
-function priceYuan(fen) {
-  const n = Number(fen)
-  return isNaN(n) ? '0.00' : (n / 100).toFixed(2)
-}
 
 const loadOrderData = async (orderNo) => {
   try {

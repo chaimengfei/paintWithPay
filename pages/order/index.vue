@@ -21,7 +21,7 @@
                   <view class="product-name-wrapper">
                     <text class="product-name">{{ item.product_name }}</text>
                     <view class="price-quantity">
-                      <text class="product-price">¥{{ priceYuan(item.unit_price) }}</text>
+                      <text class="product-price">¥{{ (Number(item.unit_price) || 0).toFixed(2) }}</text>
                       <text class="product-quantity">×{{ item.quantity }}</text>
                     </view>
                   </view>
@@ -36,7 +36,7 @@
           <view class="order-footer">
             <view class="total-amount">
               <text class="amount-label">实付：</text>
-              <text class="amount-value">¥{{ priceYuan(order.payment_amount) }}</text>
+              <text class="amount-value">¥{{ (Number(order.payment_amount) || 0).toFixed(2) }}</text>
             </view>
             <view class="order-status-text">{{ orderStatusText(order.order_status) }}</view>
             <view class="action-buttons">
@@ -120,10 +120,6 @@ export default {
     }
   },
   methods: {
-    priceYuan(fen) {
-      const n = Number(fen)
-      return isNaN(n) ? '0.00' : (n / 100).toFixed(2)
-    },
     orderStatusText(orderStatus) {
       if (orderStatus === 1) return '待付款'
       if (orderStatus === 2) return '已完成'
