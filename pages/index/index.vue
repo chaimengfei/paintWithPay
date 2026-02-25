@@ -72,7 +72,7 @@
             </view>
             <view class="price-info">
               <text class="price-label">参考价：</text>
-              <text class="product-price">¥{{ product.reference_price }}</text>
+              <text class="product-price">¥{{ product.seller_price }}</text>
               <text class="product-unit">/ {{ product.unit }}</text>
             </view>
             <text class="price-tip">（价格可能浮动）</text>
@@ -447,7 +447,7 @@ export default {
         name: product.name,
         image: product.image,
         specification: product.specification || '',
-        reference_price: product.reference_price,
+        seller_price: product.seller_price,
         unit: product.unit
       }))
       uni.navigateTo({
@@ -471,7 +471,7 @@ export default {
     showProductDetail(product) {
       // 显示商品详细信息弹窗
       const productName = product.specification ? `${product.name} ${product.specification}` : product.name
-      const content = `商品名称：${productName}\n参考价：¥${product.reference_price} / ${product.unit}\n\n如需了解更多信息或咨询价格，请联系客服。`
+      const content = `商品名称：${productName}\n售价：¥${product.seller_price} / ${product.unit}\n\n如需了解更多信息或咨询价格，请联系客服。`
       uni.showModal({
         title: '商品详情',
         content: content,

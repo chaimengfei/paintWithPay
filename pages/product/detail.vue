@@ -25,8 +25,8 @@
       </view>
 
       <view class="price-section">
-        <text class="price-label">参考价：</text>
-        <text class="product-price">¥{{ product.reference_price }}</text>
+        <text class="price-label">售价：</text>
+        <text class="product-price">¥{{ product.seller_price }}</text>
         <text class="product-unit">/ {{ product.unit }}</text>
       </view>
       <text class="price-tip">（价格可能浮动）</text>
@@ -52,7 +52,7 @@ export default {
         name: '',
         image: '',
         specification: '',
-        reference_price: 0,
+        seller_price: 0,
         unit: ''
       }
     }
