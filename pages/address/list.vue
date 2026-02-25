@@ -16,9 +16,9 @@
           <view class="row detail-row">{{ item.fullAddress }}</view>
         </view>
         <view class="card-actions">
-          <button class="btn-text" @click="setDefault(item)">设为默认</button>
-          <button class="btn-text" @click="edit(item)">编辑</button>
-          <button class="btn-text danger" @click="remove(item)">删除</button>
+          <view class="text-btn" @click="setDefault(item)"><text>设为默认</text></view>
+          <view class="text-btn" @click="edit(item)"><text>编辑</text></view>
+          <view class="text-btn danger" @click="remove(item)"><text>删除</text></view>
         </view>
       </view>
     </view>
@@ -169,19 +169,23 @@ export default {
 .card-actions {
   display: flex;
   align-items: center;
-  gap: 24rpx;
+  flex-wrap: wrap;
+  gap: 16rpx 32rpx;
   padding-top: 16rpx;
   border-top: 1rpx solid #eee;
 }
-.btn-text {
+.text-btn {
+  padding: 8rpx 16rpx;
   font-size: 26rpx;
   color: #4169E1;
   background: none;
-  border: none;
-  padding: 0;
-  line-height: 1;
+  white-space: nowrap;
 }
-.btn-text.danger {
+.text-btn text {
+  font-size: 26rpx;
+  color: #4169E1;
+}
+.text-btn.danger text {
   color: #e93b3d;
 }
 .empty {

@@ -4,6 +4,7 @@
 		<view class="header address-header" @click="selectedAddress ? goAddressList() : goAddAddress()">
 			<view v-if="selectedAddress" class="address-content">
 				<view class="address-row">
+					<text v-if="selectedAddress.is_default" class="address-default-tag">默认</text>
 					<text class="address-name">{{ selectedAddress.recipient_name }}</text>
 					<text class="address-phone">{{ selectedAddress.recipient_phone }}</text>
 				</view>
@@ -67,7 +68,7 @@
 						<text class="total-label">合计：</text>
 						<text class="total-price">¥{{ totalPrice }}</text>
 					</view>
-					<text class="total-tip">金额单位：元（支付以实际为准）</text>
+					<text class="total-tip">金额单位 元，支付以实际为准</text>
 				</view>
 				<button
 					class="submit-btn"
@@ -354,6 +355,14 @@
 	.address-phone {
 		font-size: 26rpx;
 		color: #666;
+		margin-right: 12rpx;
+	}
+	.address-default-tag {
+		font-size: 22rpx;
+		color: #4169E1;
+		background: #e8eeff;
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
 	}
 	.address-detail {
 		font-size: 26rpx;
@@ -557,8 +566,8 @@
 		line-height: 1.4;
 	}
 	.submit-btn {
-		background-color: #4169E1;
-		color: white;
+		background-color: #ffb74d;
+		color: #fff;
 		height: 80rpx;
 		line-height: 80rpx;
 		padding: 0 30rpx;
@@ -567,6 +576,9 @@
 		font-weight: bold;
 		width: 100%;
 		border: none;
+	}
+	.submit-btn:active {
+		background-color: #ffa726;
 	}
 	.empty-cart {
 		display: flex;
