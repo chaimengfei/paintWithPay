@@ -50,12 +50,23 @@
 
 <script>
 import { payCombined } from '@/api/pay.js'
+import { getOrderDetail } from '@/api/order.js'
+
+const POLL_DELAY_MS = 8000   // 首次轮询前等待 8s
+const POLL_INTERVAL_MS = 2000 // 每 2s 轮询一次
+const POLL_MAX_COUNT = 150    // 最多轮询约 5 分钟
 
 export default {
   data() {
     return {
-      order: null
+      order: null,
+      pollTimeoutId: null,
+      pollIntervalId: null,
+      pollCount: 0
     }
+  },
+  onUnload() {
+    this.stopPolling()
   },
   computed: {
     fullAddress() {
@@ -109,10 +120,8 @@ export default {
                   uni.requestPayment({
                     ...data.wechat_pay_params,
                     success: () => {
-                      uni.removeStorageSync('orderConfirmData')
-                      uni.redirectTo({
-                        url: `/pages/order/success?order_no=${encodeURIComponent(this.order.order_no)}&order_info=${encodeURIComponent('订单已创建，请支付或联系客服')}`
-                      })
+                      this.stopPolling()
+                      this.goToOrderSuccess('支付成功')
                     },
                     fail: (err) => {
                       uni.showToast({
@@ -121,6 +130,7 @@ export default {
                       })
                     }
                   })
+                  this.startPolling()
                 } else {
                   uni.removeStorageSync('orderConfirmData')
                   uni.redirectTo({
@@ -153,6 +163,52 @@ export default {
       uni.removeStorageSync('orderConfirmData')
       uni.redirectTo({
         url: `/pages/order/success?order_no=${encodeURIComponent(this.order.order_no)}&order_info=${encodeURIComponent('订单已创建，请支付或联系客服')}`
+      })
+    },
+    startPolling() {
+      this.stopPolling()
+      this.pollCount = 0
+      const orderNo = this.order && this.order.order_no
+      if (!orderNo) return
+      const check = () => {
+        this.pollCount++
+        if (this.pollCount > POLL_MAX_COUNT) {
+          this.stopPolling()
+          return
+        }
+        getOrderDetail(orderNo)
+          .then(res => {
+            if (res.data && res.data.code === 0 && res.data.data) {
+              const orderStatus = res.data.data.order_status
+              if (orderStatus === 2) {
+                this.stopPolling()
+                this.goToOrderSuccess('订单支付成功')
+              }
+            }
+          })
+          .catch(() => {})
+      }
+      this.pollTimeoutId = setTimeout(() => {
+        this.pollTimeoutId = null
+        check()
+        this.pollIntervalId = setInterval(check, POLL_INTERVAL_MS)
+      }, POLL_DELAY_MS)
+    },
+    stopPolling() {
+      if (this.pollTimeoutId) {
+        clearTimeout(this.pollTimeoutId)
+        this.pollTimeoutId = null
+      }
+      if (this.pollIntervalId) {
+        clearInterval(this.pollIntervalId)
+        this.pollIntervalId = null
+      }
+    },
+    goToOrderSuccess(orderInfo) {
+      if (!this.order || !this.order.order_no) return
+      uni.removeStorageSync('orderConfirmData')
+      uni.redirectTo({
+        url: `/pages/order/success?order_no=${encodeURIComponent(this.order.order_no)}&order_info=${encodeURIComponent(orderInfo || '订单支付成功')}`
       })
     }
   }

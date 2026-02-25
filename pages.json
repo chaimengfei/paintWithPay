@@ -40,7 +40,7 @@
 	{
 	  "path": "pages/order/success",
 	  "style": {
-		"navigationBarTitleText": "提交成功",
+		"navigationBarTitleText": "支付成功",
 		"navigationStyle": "custom"
 	  }
 	},
