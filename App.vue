@@ -1,20 +1,26 @@
 <script>
 import { ENV_INFO } from '@/api/common.js'
+import { trySilentLogin } from '@/api/silentLogin.js'
 
 export default {
   onLaunch: function() {
-    // 检查环境一致性（必须在检查登录状态之前）
     this.checkEnvConsistency()
-    // 检查登录状态
+    this.tryRestoreLoginOnLaunch()
     this.checkGlobalLoginStatus()
-    // 移除应用启动时的购物车徽标初始化，避免401错误
-    // 购物车徽标只在用户点击购物车图标时更新
   },
   onShow: function() {
   },
   onHide: function() {
   },
   methods: {
+    // 启动时若无 token 则尝试静默登录（仅 code 复登），实现多日未打开也能恢复登录
+    tryRestoreLoginOnLaunch() {
+      const token = uni.getStorageSync('token')
+      if (token) return
+      trySilentLogin().then(() => {
+        // 静默登录成功，token 已写入 storage，后续请求会自动带 token
+      })
+    },
     // 检查环境一致性
     checkEnvConsistency() {
       const storedEnv = uni.getStorageSync('env')

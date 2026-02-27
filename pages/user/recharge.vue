@@ -60,7 +60,9 @@ export default {
         }
         const res = await payRecharge({
           code,
-          amount: amountYuan
+          amount: amountYuan,
+          gift_type: 2,
+          gift_amount: 0
         })
         uni.hideLoading()
         if (res.data && res.data.code === 0 && res.data.data) {

@@ -96,6 +96,7 @@
 	} from '@/api/cart.js'
 	import { orderCheckout } from '@/api/order.js'
 	import { getAddressList } from '@/api/address.js'
+	import { trySilentLogin } from '@/api/silentLogin.js'
 
 	export default {
 		data() {
@@ -105,8 +106,14 @@
 				selectedAddress: null
 			}
 		},
-		onShow() {
-			const token = uni.getStorageSync('token')
+		async onShow() {
+			let token = uni.getStorageSync('token')
+			if (!token) {
+				const ok = await this.trySilentLogin()
+				if (ok) {
+					token = uni.getStorageSync('token')
+				}
+			}
 			if (!token) {
 				uni.showModal({
 					title: '提示',
@@ -143,6 +150,9 @@
 			}
 		},
 		methods: {
+			trySilentLogin() {
+				return trySilentLogin()
+			},
 			async loadCartData() {
 				try {
 					const res = await getCartList()
