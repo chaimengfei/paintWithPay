@@ -64,6 +64,12 @@
 	  }
 	},
 	{
+	  "path": "pages/user/recharge",
+	  "style": {
+	    "navigationBarTitleText": "充值"
+	  }
+	},
+	{
 	  "path": "pages/address/list",
 	  "style": {
 	    "navigationBarTitleText": "收货地址"

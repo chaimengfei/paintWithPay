@@ -26,12 +26,13 @@ export const payCombined = (data) => {
 }
 
 /**
- * 小程序充值预下单
+ * 小程序充值预下单（微信支付）
  * @param {Object} data
- * @param {number} data.amount 充值金额（元）
- * @param {number} [data.gift_type]
- * @param {number} [data.gift_amount]
- * @returns {Promise}
+ * @param {string} data.code 微信 wx.login 返回的 code（必填）
+ * @param {number} data.amount 充值金额（元），必须大于 0
+ * @param {number} [data.gift_type] 赠送类型：1-额外赠送余额, 2-送虚拟物品
+ * @param {number} [data.gift_amount] 赠送金额（元），gift_type=1 时必填
+ * @returns {Promise} 返回 data.pay_params 用于 uni.requestPayment
  */
 export const payRecharge = (data) => {
   return post('/api/pay/recharge', data)

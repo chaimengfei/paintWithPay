@@ -13,7 +13,7 @@ export const goLogin = (data) => {
  * @param {string} [data.avatar] 头像URL
  */
 export const updateUserInfo = (data) => {
-	return post('/api/user/update/info', data)
+	return post('/api/user/update', data)
 }
 
 /**

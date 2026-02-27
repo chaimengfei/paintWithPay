@@ -42,6 +42,10 @@
         <text class="function-icon">📋</text>
         <text class="function-label">我的单据</text>
       </view>
+      <view class="function-item" @click="goRecharge">
+        <text class="function-icon">💰</text>
+        <text class="function-label">充值</text>
+      </view>
       <view class="function-item" @click="contactService">
         <text class="function-icon">📞</text>
         <text class="function-label">联系客服</text>
@@ -147,6 +151,26 @@ export default {
     goToInquiry() {
       uni.navigateTo({
         url: '/pages/order/index'
+      })
+    },
+    
+    // 充值（需登录）
+    goRecharge() {
+      const token = uni.getStorageSync('token')
+      if (!token) {
+        uni.showModal({
+          title: '提示',
+          content: '请先登录后再充值',
+          success: (res) => {
+            if (res.confirm) {
+              uni.navigateTo({ url: '/pages/user/login' })
+            }
+          }
+        })
+        return
+      }
+      uni.navigateTo({
+        url: '/pages/user/recharge'
       })
     },
     
