@@ -1,27 +1,30 @@
 <template>
   <view class="content">
     <view class="user-header">
-      <!-- 使用微信官方 chooseAvatar 组件获取头像 -->
-      <button 
-        v-if="isLogin" 
-        class="avatar-button" 
-        open-type="chooseAvatar"
-        @chooseavatar="onChooseAvatar"
-      >
+      <!-- 头像 + VIP 角标 -->
+      <view class="avatar-wrap">
+        <button 
+          v-if="isLogin" 
+          class="avatar-button" 
+          open-type="chooseAvatar"
+          @chooseavatar="onChooseAvatar"
+        >
+          <image 
+            class="avatar" 
+            :src="userInfo.avatar ? userInfo.avatar : '/static/images/default-avatar.png'"
+            mode="aspectFill"
+          ></image>
+        </button>
         <image 
+          v-else
           class="avatar" 
-          :src="userInfo.avatar ? userInfo.avatar : '/static/images/default-avatar.png'"
+          src="/static/images/default-avatar.png"
           mode="aspectFill"
+          @click="handleAvatarClick"
         ></image>
-      </button>
-      <image 
-        v-else
-        class="avatar" 
-        src="/static/images/default-avatar.png"
-        mode="aspectFill"
-        @click="handleAvatarClick"
-      ></image>
-      <!-- 使用微信官方 nickname 组件获取昵称 -->
+        <view v-if="isLogin && isVip" class="vip-badge">V</view>
+      </view>
+      <!-- 昵称 -->
       <input 
         v-if="isLogin"
         class="username-input"
@@ -32,8 +35,12 @@
         @confirm="onNicknameConfirm"
       />
       <text v-else class="username" @click="handleUsernameClick">{{ '微信用户' }}</text>
-      <text class="welcome-text">如需采购请联系 李增春-13161621688</text>
-      <button v-if="!isLogin" class="login-btn" @click="goLogin">登录/注册</button>
+      <!-- 仅曾充值过的会员（VIP）展示余额 -->
+      <view v-if="isLogin && isVip" class="balance-row">
+        <text class="balance-label">余额</text>
+        <text class="balance-value">¥{{ balanceDisplay }}</text>
+      </view>
+      <button v-if="!isLogin" class="login-btn" @click="goLogin">登录</button>
     </view>
     
     <!-- 核心功能入口 -->
@@ -66,23 +73,40 @@
 
 <script>
 import { showContactService } from '@/api/common.js'
-import { updateUserInfo, uploadAvatar } from '@/api/user.js'
+import { updateUserInfo, uploadAvatar, getUserBalance } from '@/api/user.js'
+import { trySilentLogin } from '@/api/silentLogin.js'
 
 export default {
   data() {
     return {
       userInfo: {},
-      isLogin: false
+      isLogin: false,
+      balance: null,
+      first_recharge_at: null
     }
   },
-  onShow() {
-    // tab切换时显示确认提示
-    const token = uni.getStorageSync('token')
+  computed: {
+    isVip() {
+      return !!(this.first_recharge_at && String(this.first_recharge_at).trim())
+    },
+    balanceDisplay() {
+      if (this.balance == null) return '--'
+      const n = Number(this.balance)
+      return isNaN(n) ? '0.00' : n.toFixed(2)
+    }
+  },
+  async onShow() {
+    let token = uni.getStorageSync('token')
+    if (!token) {
+      const ok = await trySilentLogin()
+      if (ok) token = uni.getStorageSync('token')
+    }
     if (!token) {
       this.checkLoginStatusWithPrompt()
-    } else {
-      this.checkLoginStatus()
+      return
     }
+    this.checkLoginStatus()
+    this.fetchBalance()
   },
   
   onLoad() {
@@ -96,16 +120,32 @@ export default {
       const user = uni.getStorageSync('userInfo')
       
       if (!token) {
-        // 未登录，只更新状态，不自动跳转
         this.isLogin = false
         this.userInfo = {}
-        // 不自动跳转，让用户点击"登录/注册"按钮或通过tab切换触发
+        this.balance = null
+        this.first_recharge_at = null
         return
       }
       
       // 已登录，更新用户信息
       this.isLogin = true
       this.userInfo = user || {}
+      this.fetchBalance()
+    },
+    
+    async fetchBalance() {
+      if (!uni.getStorageSync('token')) return
+      try {
+        const res = await getUserBalance()
+        if (res.data && res.data.code === 0 && res.data.data) {
+          const d = res.data.data
+          this.balance = d.balance != null ? d.balance : 0
+          this.first_recharge_at = d.first_recharge_at || null
+        }
+      } catch (e) {
+        this.balance = 0
+        this.first_recharge_at = null
+      }
     },
     
     // 检查登录状态（用于tab切换时）
@@ -125,10 +165,10 @@ export default {
                 url: '/pages/user/login'
               })
             } else {
-              // 用户取消，停留在当前页面（我的页面，显示未登录状态）
-              // 不进行任何跳转，只更新登录状态
               this.isLogin = false
               this.userInfo = {}
+              this.balance = null
+              this.first_recharge_at = null
             }
           }
         })
@@ -138,6 +178,7 @@ export default {
       // 已登录，更新用户信息
       this.isLogin = true
       this.userInfo = user || {}
+      this.fetchBalance()
       return true
     },
     
@@ -439,6 +480,11 @@ export default {
   color: white;
 }
 
+.avatar-wrap {
+  position: relative;
+  display: inline-block;
+}
+
 .avatar-button {
   background: transparent;
   border: none;
@@ -457,8 +503,25 @@ export default {
   height: 120rpx;
   border-radius: 50%;
   border: 4rpx solid rgba(255,255,255,0.3);
-  margin-right: 30rpx;
   display: block;
+}
+
+.vip-badge {
+  position: absolute;
+  right: -4rpx;
+  bottom: -4rpx;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd700, #ffb347);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid rgba(255,255,255,0.9);
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.2);
 }
 
 .username {
@@ -486,11 +549,23 @@ export default {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.welcome-text {
+.balance-row {
+  display: flex;
+  align-items: baseline;
+  margin-top: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+.balance-label {
   font-size: 24rpx;
   opacity: 0.9;
-  margin-top: 20rpx;
-  margin-bottom: 20rpx;
+  margin-right: 8rpx;
+}
+
+.balance-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  letter-spacing: 0.5rpx;
 }
 
 .function-grid {

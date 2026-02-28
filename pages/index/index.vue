@@ -1,11 +1,5 @@
 <template>
   <view class="container">
-    <!-- 公告栏 -->
-    <view class="notice-bar">
-      <text class="notice-icon">📢</text>
-      <text class="notice-text">本平台为产品展示中心，如需采购联系 李增春13161621688</text>
-    </view>
-    
     <!-- 搜索框 -->
     <view class="search-container">
       <view class="search-box">
@@ -964,30 +958,6 @@ export default {
   color: #999;
   margin-left: 8rpx;
   font-weight: normal;
-}
-
-/* 公告栏样式 */
-.notice-bar {
-  background-color: #fff3cd;
-  margin: 0 20rpx 20rpx;
-  padding: 20rpx;
-  border-radius: 8rpx;
-  border-left: 4rpx solid #ffc107;
-  display: flex;
-  align-items: flex-start;
-}
-
-.notice-icon {
-  font-size: 32rpx;
-  margin-right: 10rpx;
-  flex-shrink: 0;
-}
-
-.notice-text {
-  font-size: 24rpx;
-  color: #856404;
-  line-height: 1.6;
-  flex: 1;
 }
 
 .price-info {
