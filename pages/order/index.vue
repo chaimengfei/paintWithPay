@@ -34,11 +34,11 @@
           </view>
 
           <view class="order-footer">
+            <view class="order-status-text">{{ orderStatusText(order.order_status) }}</view>
             <view class="total-amount">
               <text class="amount-label">实付：</text>
               <text class="amount-value">¥{{ (Number(order.payment_amount) || 0).toFixed(2) }}</text>
             </view>
-            <view class="order-status-text">{{ orderStatusText(order.order_status) }}</view>
             <view class="action-buttons">
               <button
                 class="action-btn view-quote-btn"
@@ -47,10 +47,10 @@
                 查看详情
               </button>
               <button
-                class="action-btn contact-btn"
-                @click.stop="contactService"
+                class="action-btn rebuy-btn"
+                @click.stop="rebuy(order.order_no)"
               >
-                联系客服
+                再来一单
               </button>
             </view>
           </view>
@@ -74,8 +74,7 @@
 </template>
 
 <script>
-import { getOrderList } from '@/api/order.js'
-import { showContactService } from '@/api/common.js'
+import orderApi from '@/api/order.js'
 
 export default {
   data() {
@@ -129,7 +128,7 @@ export default {
       if (this.loading || !this.hasMore) return
       this.loading = true
       try {
-        const res = await getOrderList({
+        const res = await orderApi.getOrderList({
           status: this.status,
           page: this.page,
           page_size: this.pageSize
@@ -170,8 +169,25 @@ export default {
       const min = String(date.getMinutes()).padStart(2, '0')
       return `${y}/${m}/${d} ${h}:${min}`
     },
-    contactService() {
-      showContactService()
+    async rebuy(orderNo) {
+      if (!orderNo) return
+      uni.showLoading({ title: '加载中...', mask: true })
+      try {
+        const res = await orderApi.orderRebuy(orderNo)
+        uni.hideLoading()
+        const data = res.data
+        if (data && data.code === 0) {
+          uni.showToast({ title: data.message || '商品已加入购物车', icon: 'none' })
+          setTimeout(() => {
+            uni.switchTab({ url: '/pages/cart/index' })
+          }, 1500)
+        } else {
+          uni.showToast({ title: (data && data.message) || '操作失败', icon: 'none' })
+        }
+      } catch (err) {
+        uni.hideLoading()
+        uni.showToast({ title: (err && err.message) || '操作失败，请重试', icon: 'none' })
+      }
     },
     getDisplayItems(items) {
       if (!items || items.length === 0) return []
@@ -337,6 +353,11 @@ export default {
 .contact-btn {
   background-color: #ffd700;
   color: #333;
+  border: none;
+}
+.rebuy-btn {
+  background-color: #f08b8b;
+  color: #fff;
   border: none;
 }
 .empty-order {

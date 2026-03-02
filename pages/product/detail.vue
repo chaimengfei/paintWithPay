@@ -319,11 +319,11 @@ export default {
 }
 
 .add-cart-btn {
-  background-color: #e8e8e8;
-  color: #888;
+  background-color: #f08b8b;
+  color: #fff;
 }
 
 .add-cart-btn:active {
-  background-color: #d8d8d8;
+  background-color: #e07b7b;
 }
 </style>

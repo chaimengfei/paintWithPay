@@ -71,8 +71,8 @@
             </view>
             <text class="price-tip">（价格可能浮动）</text>
             <view class="product-actions" @click.stop @tap.stop>
-              <button class="action-btn contact-btn" hover-class="contact-btn-hover" @click.stop="contactService" @tap.stop="contactService">
-                联系客服
+              <button class="action-btn buy-now-btn" hover-class="buy-now-btn-hover" @click.stop="buyNow(product)" @tap.stop="buyNow(product)">
+                立即购买
               </button>
 <button class="action-btn add-cart-btn" @click.stop="addToCart(product.id)" @tap.stop="addToCart(product.id)">
 				加入购物车
@@ -99,6 +99,7 @@
 <script>
 import { getProductList } from '@/api/product.js'
 import { addToCart as addToCartApi, getCartList } from '@/api/cart.js'
+import orderApi from '@/api/order.js'
 import { goLogin } from '@/api/user.js'
 import { showContactService, ENV_INFO } from '@/api/common.js'
 
@@ -449,15 +450,39 @@ export default {
       })
     },
     
-    // 联系客服
+    // 立即购买：调用 checkout 只传 product_id、quantity，再跳转订单确认页
+    async buyNow(product) {
+      if (!product || !product.id) return
+      const token = uni.getStorageSync('token')
+      if (!token) {
+        goLogin()
+        return
+      }
+      uni.showLoading({ title: '提交中...', mask: true })
+      try {
+        const res = await orderApi.orderCheckout({
+          product_id: product.id,
+          quantity: 1
+        })
+        uni.hideLoading()
+        const data = res.data
+        if (data && data.code === 0 && data.data && data.data.order_no) {
+          uni.setStorageSync('orderConfirmData', data.data)
+          uni.navigateTo({ url: '/pages/order/confirm' })
+        } else {
+          uni.showToast({ title: (data && data.message) || '提交失败', icon: 'none' })
+        }
+      } catch (err) {
+        uni.hideLoading()
+        uni.showToast({ title: (err && err.message) || '提交失败，请重试', icon: 'none' })
+      }
+    },
+    // 联系客服（弹窗等仍使用）
     contactService() {
       try {
-        const result = showContactService()
+        showContactService()
       } catch (err) {
-        uni.showToast({
-          title: '联系客服失败',
-          icon: 'none'
-        })
+        uni.showToast({ title: '联系客服失败', icon: 'none' })
       }
     },
     
@@ -1013,21 +1038,27 @@ export default {
 }
 
 .add-cart-btn {
-  background-color: #e0e0e0;
-  color: #444;
+  background-color: #f08b8b;
+  color: #fff;
 }
 
 .add-cart-btn:active {
-  background-color: #d8d8d8;
+  background-color: #e07b7b;
 }
 
 .contact-btn {
   background-color: #ff9500;
   color: #fff;
 }
-
 .contact-btn-hover {
   background-color: #e6850e;
+}
+.buy-now-btn {
+  background-color: #7bc97b;
+  color: #fff;
+}
+.buy-now-btn-hover {
+  background-color: #6ab86a;
 }
 
 .empty {

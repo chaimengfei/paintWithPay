@@ -374,12 +374,12 @@ const rebuy = async () => {
   text-align: center;
 }
 .share-btn {
-  background-color: #ff9500;
+  background-color: #7bc97b;
   color: #fff;
 }
 .contact-btn {
-  background-color: #fff;
-  color: #666;
-  border: 1rpx solid #ddd;
+  background-color: #f08b8b;
+  color: #fff;
+  border: none;
 }
 </style>
