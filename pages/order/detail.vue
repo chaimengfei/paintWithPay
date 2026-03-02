@@ -64,7 +64,7 @@
 
     <view class="action-bar">
       <button class="action-btn share-btn" open-type="share">分享</button>
-      <button class="action-btn contact-btn" @click="contactService">联系客服</button>
+      <button class="action-btn contact-btn" @click="rebuy">再来一单</button>
     </view>
   </view>
 </template>
@@ -72,8 +72,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { onLoad, onShareAppMessage } from '@dcloudio/uni-app'
-import { getOrderDetail } from '@/api/order.js'
-import { showContactService } from '@/api/common.js'
+import * as orderApi from '@/api/order.js'
 
 const order = ref({
   items: [],
@@ -89,7 +88,7 @@ const order = ref({
 
 const loadOrderData = async (orderNo) => {
   try {
-    const res = await getOrderDetail(orderNo)
+    const res = await orderApi.getOrderDetail(orderNo)
     const data = res.data
     if (data && data.code === 0 && data.data) {
       order.value = {
@@ -141,8 +140,29 @@ const formatTime = (timeStr) => {
   return timeStr ? new Date(timeStr).toLocaleString() : ''
 }
 
-const contactService = () => {
-  showContactService()
+const rebuy = async () => {
+  const orderNo = order.value.order_no
+  if (!orderNo) {
+    uni.showToast({ title: '订单号缺失', icon: 'none' })
+    return
+  }
+  uni.showLoading({ title: '加载中...', mask: true })
+  try {
+    const res = await orderApi.orderRebuy(orderNo)
+    uni.hideLoading()
+    const data = res.data
+    if (data && data.code === 0) {
+      uni.showToast({ title: data.message || '商品已加入购物车', icon: 'none' })
+      setTimeout(() => {
+        uni.switchTab({ url: '/pages/cart/index' })
+      }, 1500)
+    } else {
+      uni.showToast({ title: (data && data.message) || '操作失败', icon: 'none' })
+    }
+  } catch (err) {
+    uni.hideLoading()
+    uni.showToast({ title: (err && err.message) || '操作失败，请重试', icon: 'none' })
+  }
 }
 </script>
 

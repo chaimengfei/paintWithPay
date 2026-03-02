@@ -11,25 +11,40 @@
           <text class="checkmark">✓</text>
         </view>
       </view>
-      <text class="success-title">提交成功</text>
-      <text class="success-subtitle">{{ orderInfo || '订单已创建，请支付或联系客服' }}</text>
+      <text class="success-title">{{ successTitle }}</text>
+      <text class="success-subtitle">{{ successSubtitle }}</text>
     </view>
 
     <view class="action-buttons">
       <button class="view-detail-btn" hover-class="view-detail-btn-hover" @click="viewOrderDetail">查看订单</button>
-      <button class="contact-service-btn" @click="contactService">联系客服</button>
+      <button class="contact-service-btn" @click="goToProductList">返回产品页</button>
     </view>
   </view>
 </template>
 
 <script>
-import { showContactService } from '@/api/common.js'
-
 export default {
   data() {
     return {
       orderNo: '',
-      orderInfo: ''
+      orderInfo: '',
+      orderStatus: null,
+      balanceAmount: null,
+      wechatAmount: null
+    }
+  },
+  computed: {
+    successTitle() {
+      return Number(this.orderStatus) === 2 ? '支付成功' : '提交成功'
+    },
+    successSubtitle() {
+      const balance = Number(this.balanceAmount)
+      const wechat = Number(this.wechatAmount)
+      if (balance > 0 && wechat === 0) {
+        const n = isNaN(balance) ? 0 : balance
+        return `余额支付 ${n.toFixed(2)}元`
+      }
+      return this.orderInfo || '订单已创建，请支付或联系客服'
     }
   },
   onLoad(options) {
@@ -38,6 +53,15 @@ export default {
     }
     if (options.order_info) {
       this.orderInfo = decodeURIComponent(options.order_info)
+    }
+    if (options.order_status != null && options.order_status !== '') {
+      this.orderStatus = options.order_status
+    }
+    if (options.balance_amount != null && options.balance_amount !== '') {
+      this.balanceAmount = options.balance_amount
+    }
+    if (options.wechat_amount != null && options.wechat_amount !== '') {
+      this.wechatAmount = options.wechat_amount
     }
   },
   methods: {
@@ -62,8 +86,10 @@ export default {
         })
       }
     },
-    contactService() {
-      showContactService()
+    goToProductList() {
+      uni.switchTab({
+        url: '/pages/index/index'
+      })
     }
   }
 }

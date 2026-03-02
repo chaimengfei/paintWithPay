@@ -43,7 +43,6 @@
 
     <view class="footer-bar">
       <button class="btn-pay" @click="goPay">去支付</button>
-      <button class="btn-later" @click="goSuccessLater">稍后支付</button>
     </view>
   </view>
 </template>
@@ -133,8 +132,12 @@ export default {
                   this.startPolling()
                 } else {
                   uni.removeStorageSync('orderConfirmData')
-                  uni.redirectTo({
-                    url: `/pages/order/success?order_no=${encodeURIComponent(this.order.order_no)}&order_info=${encodeURIComponent('订单已创建，请支付或联系客服')}`
+                  this.redirectToSuccess({
+                    order_no: this.order.order_no,
+                    order_status: data.order_status,
+                    balance_amount: data.balance_amount,
+                    wechat_amount: data.wechat_amount,
+                    order_info: '订单已创建，请支付或联系客服'
                   })
                 }
               } else {
@@ -158,12 +161,14 @@ export default {
         }
       })
     },
-    goSuccessLater() {
-      if (!this.order || !this.order.order_no) return
-      uni.removeStorageSync('orderConfirmData')
-      uni.redirectTo({
-        url: `/pages/order/success?order_no=${encodeURIComponent(this.order.order_no)}&order_info=${encodeURIComponent('订单已创建，请支付或联系客服')}`
-      })
+    redirectToSuccess(params) {
+      const q = []
+      if (params.order_no) q.push(`order_no=${encodeURIComponent(params.order_no)}`)
+      if (params.order_info) q.push(`order_info=${encodeURIComponent(params.order_info)}`)
+      if (params.order_status != null && params.order_status !== '') q.push(`order_status=${encodeURIComponent(params.order_status)}`)
+      if (params.balance_amount != null && params.balance_amount !== '') q.push(`balance_amount=${encodeURIComponent(params.balance_amount)}`)
+      if (params.wechat_amount != null && params.wechat_amount !== '') q.push(`wechat_amount=${encodeURIComponent(params.wechat_amount)}`)
+      uni.redirectTo({ url: `/pages/order/success?${q.join('&')}` })
     },
     startPolling() {
       this.stopPolling()
@@ -207,8 +212,10 @@ export default {
     goToOrderSuccess(orderInfo) {
       if (!this.order || !this.order.order_no) return
       uni.removeStorageSync('orderConfirmData')
-      uni.redirectTo({
-        url: `/pages/order/success?order_no=${encodeURIComponent(this.order.order_no)}&order_info=${encodeURIComponent(orderInfo || '订单支付成功')}`
+      this.redirectToSuccess({
+        order_no: this.order.order_no,
+        order_status: 2,
+        order_info: orderInfo || '订单支付成功'
       })
     }
   }
@@ -345,15 +352,5 @@ export default {
 }
 .btn-pay:active {
   background: #ffa726;
-}
-.btn-later {
-  width: 100%;
-  height: 80rpx;
-  line-height: 80rpx;
-  background: #fff;
-  color: #666;
-  font-size: 28rpx;
-  border: 1rpx solid #ddd;
-  border-radius: 40rpx;
 }
 </style>

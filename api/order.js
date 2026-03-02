@@ -55,3 +55,11 @@ export const deleteOrder = (orderNo, id = 0) => {
 export const orderRebuy = (orderNo) => {
   return post(`/api/order/rebuy?order_no=${encodeURIComponent(orderNo)}`)
 }
+
+export default {
+  orderCheckout,
+  getOrderList,
+  getOrderDetail,
+  deleteOrder,
+  orderRebuy
+}

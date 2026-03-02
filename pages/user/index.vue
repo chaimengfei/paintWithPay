@@ -47,7 +47,7 @@
     <view class="function-grid">
       <view class="function-item" @click="goToInquiry">
         <text class="function-icon">📋</text>
-        <text class="function-label">我的单据</text>
+        <text class="function-label">我的订单</text>
       </view>
       <view class="function-item" @click="goRecharge">
         <text class="function-icon">💰</text>
