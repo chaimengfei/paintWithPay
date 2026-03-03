@@ -40,9 +40,15 @@ export default {
     successSubtitle() {
       const balance = Number(this.balanceAmount)
       const wechat = Number(this.wechatAmount)
+      const fmt = (n) => (isNaN(n) ? 0 : n).toFixed(2)
+      if (balance > 0 && wechat > 0) {
+        return `余额自动扣款 ${fmt(balance)}元，支付 ${fmt(wechat)}元`
+      }
       if (balance > 0 && wechat === 0) {
-        const n = isNaN(balance) ? 0 : balance
-        return `余额支付 ${n.toFixed(2)}元`
+        return `余额自动扣款 ${fmt(balance)}元`
+      }
+      if (balance === 0 && wechat > 0) {
+        return `支付 ${fmt(wechat)}元`
       }
       return this.orderInfo || '订单已创建，请支付或联系客服'
     }

@@ -61,7 +61,9 @@ export default {
       order: null,
       pollTimeoutId: null,
       pollIntervalId: null,
-      pollCount: 0
+      pollCount: 0,
+      payBalanceAmount: null,
+      payWechatAmount: null
     }
   },
   onUnload() {
@@ -116,11 +118,17 @@ export default {
               if (res.data && res.data.code === 0) {
                 const data = res.data.data
                 if (data && data.wechat_pay_params && data.wechat_amount > 0) {
+                  this.payBalanceAmount = data.balance_amount
+                  this.payWechatAmount = data.wechat_amount
                   uni.requestPayment({
                     ...data.wechat_pay_params,
                     success: () => {
                       this.stopPolling()
-                      this.goToOrderSuccess('支付成功')
+                      this.goToOrderSuccess({
+                        order_info: '支付成功',
+                        balance_amount: this.payBalanceAmount,
+                        wechat_amount: this.payWechatAmount
+                      })
                     },
                     fail: (err) => {
                       uni.showToast({
@@ -187,7 +195,11 @@ export default {
               const orderStatus = res.data.data.order_status
               if (orderStatus === 2) {
                 this.stopPolling()
-                this.goToOrderSuccess('订单支付成功')
+                this.goToOrderSuccess({
+                  order_info: '订单支付成功',
+                  balance_amount: this.payBalanceAmount,
+                  wechat_amount: this.payWechatAmount
+                })
               }
             }
           })
@@ -209,14 +221,19 @@ export default {
         this.pollIntervalId = null
       }
     },
-    goToOrderSuccess(orderInfo) {
+    goToOrderSuccess(opts) {
       if (!this.order || !this.order.order_no) return
       uni.removeStorageSync('orderConfirmData')
-      this.redirectToSuccess({
+      const params = {
         order_no: this.order.order_no,
         order_status: 2,
-        order_info: orderInfo || '订单支付成功'
-      })
+        order_info: typeof opts === 'string' ? opts : (opts && opts.order_info) || '订单支付成功'
+      }
+      if (opts && typeof opts === 'object') {
+        if (opts.balance_amount != null && opts.balance_amount !== '') params.balance_amount = opts.balance_amount
+        if (opts.wechat_amount != null && opts.wechat_amount !== '') params.wechat_amount = opts.wechat_amount
+      }
+      this.redirectToSuccess(params)
     }
   }
 }
