@@ -22,14 +22,10 @@
           <view class="product-info">
             <view class="product-name-wrapper">
               <text class="product-name">{{ item.product_name }}</text>
-              <view class="price-line">
-                <text class="product-price">¥{{ (Number(item.unit_price) || 0).toFixed(2) }}</text>
-                <text v-if="item.unit" class="product-unit">/{{ item.unit }}</text>
-                <text class="product-quantity">×{{ item.quantity }}</text>
-              </view>
+              <text class="product-price-qty">¥{{ (Number(item.unit_price) || 0).toFixed(2) }}{{ item.unit ? '/' + item.unit : '' }} ×{{ item.quantity != null && item.quantity !== '' ? item.quantity : 1 }}</text>
             </view>
             <view class="total-price">
-              <text class="total-price-text">小计: ¥{{ (Number(item.total_price) || 0).toFixed(2) }}</text>
+              <text class="total-price-value">小计: ¥{{ (Number(item.total_price) || 0).toFixed(2) }}</text>
             </view>
           </view>
         </view>
@@ -272,10 +268,12 @@ const rebuy = async () => {
 }
 .product-name-wrapper {
   display: flex;
-  align-items: flex-start;
-  position: relative;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16rpx;
   margin-bottom: 8rpx;
   line-height: 1.4;
+  width: 100%;
 }
 .product-name {
   font-size: 28rpx;
@@ -286,35 +284,23 @@ const rebuy = async () => {
   overflow: hidden;
   flex: 1;
   min-width: 0;
-  padding-right: 120rpx;
 }
-.price-line {
-  display: flex;
-  align-items: baseline;
-  gap: 12rpx;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-}
-.product-price {
-  color: #e93b3d;
-  font-size: 30rpx;
+.product-price-qty {
+  font-size: 28rpx;
+  color: #333;
   font-weight: bold;
-}
-.product-quantity {
-  color: #666;
-  font-size: 24rpx;
-}
-.product-unit {
-  color: #666;
-  font-size: 24rpx;
+  flex-shrink: 0;
 }
 .total-price {
   margin-top: 8rpx;
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
 }
-.total-price-text {
+.total-price-value {
   font-size: 24rpx;
-  color: #666;
+  color: #e93b3d;
+  font-weight: bold;
 }
 .order-info {
   margin-top: 40rpx;

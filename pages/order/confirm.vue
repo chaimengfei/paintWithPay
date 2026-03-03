@@ -319,7 +319,7 @@ export default {
   color: #999;
 }
 .item-price {
-  margin-right: 12rpx;
+  margin-right: 40rpx;
 }
 .item-total {
   font-size: 28rpx;

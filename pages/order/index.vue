@@ -9,8 +9,16 @@
           @click="viewOrderDetail(order.order_no)"
         >
           <view class="order-header">
-            <text class="order-no">{{ order.order_no }}</text>
-            <text class="time-value">{{ formatTime(order.created_at) }}</text>
+            <view class="order-meta">
+              <view class="order-meta-row">
+                <text class="order-no-label">订单号</text>
+                <text class="order-no">{{ order.order_no }}</text>
+              </view>
+              <text class="order-status-text" :class="'status-' + order.order_status">{{ orderStatusText(order.order_status) }}</text>
+            </view>
+            <view class="order-header-right">
+              <text class="order-time">{{ formatTime(order.created_at) }}</text>
+            </view>
           </view>
 
           <view class="order-body">
@@ -34,24 +42,25 @@
           </view>
 
           <view class="order-footer">
-            <view class="order-status-text">{{ orderStatusText(order.order_status) }}</view>
             <view class="total-amount">
               <text class="amount-label">实付：</text>
               <text class="amount-value">¥{{ (Number(order.payment_amount) || 0).toFixed(2) }}</text>
             </view>
-            <view class="action-buttons">
-              <button
-                class="action-btn view-quote-btn"
-                @click.stop="viewOrderDetail(order.order_no)"
-              >
-                查看详情
-              </button>
-              <button
-                class="action-btn rebuy-btn"
-                @click.stop="rebuy(order.order_no)"
-              >
-                再来一单
-              </button>
+            <view class="footer-actions">
+              <view class="action-buttons">
+                <button
+                  class="action-btn view-quote-btn"
+                  @click.stop="viewOrderDetail(order.order_no)"
+                >
+                  查看详情
+                </button>
+                <button
+                  class="action-btn rebuy-btn"
+                  @click.stop="rebuy(order.order_no)"
+                >
+                  再来一单
+                </button>
+              </view>
             </view>
           </view>
         </view>
@@ -224,19 +233,53 @@ export default {
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 .order-header {
-  padding-bottom: 15rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 16rpx;
+  margin-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.order-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+.order-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx 20rpx;
+  flex-wrap: wrap;
+}
+.order-no-label {
+  font-size: 24rpx;
+  color: #999;
+  flex-shrink: 0;
 }
 .order-no {
-  font-size: 26rpx;
-  color: #666;
-  font-weight: bold;
-  margin-right: 10rpx;
-}
-.time-value {
   font-size: 24rpx;
-  color: #666;
-  font-weight: normal;
+  color: #333;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.order-status-text {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #e93b3d;
+}
+.order-header-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+}
+.order-time {
+  font-size: 24rpx;
+  color: #999;
 }
 .order-body {
   padding: 20rpx 0;
@@ -312,21 +355,24 @@ export default {
   margin-left: 4rpx;
 }
 .order-footer {
-  padding-top: 20rpx;
-}
-.order-status-text {
-  font-size: 24rpx;
-  color: #999;
-  margin-bottom: 10rpx;
+  padding-top: 16rpx;
 }
 .total-amount {
-  display: block;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
   font-size: 28rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
+}
+.footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
 }
 .amount-label {
   color: #666;
+  margin-right: 8rpx;
 }
 .amount-value {
   color: #e93b3d;
@@ -334,8 +380,9 @@ export default {
 }
 .action-buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: 20rpx;
+  align-items: center;
+  gap: 24rpx;
+  flex-shrink: 0;
 }
 .action-btn {
   height: 60rpx;
