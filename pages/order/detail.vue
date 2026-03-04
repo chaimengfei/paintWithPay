@@ -9,10 +9,10 @@
 
     <view class="order-card">
       <view class="order-header">
+        <text class="order-status">{{ orderStatusText }}</text>
         <view class="order-no-wrapper">
           <text class="order-no">订单号：{{ order.order_no }}</text>
         </view>
-        <text class="order-status">{{ orderStatusText }}</text>
       </view>
 
       <view class="product-list">
@@ -236,12 +236,12 @@ const rebuy = async () => {
 }
 .order-no {
   color: #333;
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: bold;
 }
 .order-status {
   color: #e93b3d;
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: bold;
 }
 .section-title {
